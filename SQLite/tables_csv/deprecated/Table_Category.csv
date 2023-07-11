@@ -1,0 +1,5 @@
+CategoryID, CategoryType
+C100, Personal Auto
+C200, Commercial Auto
+C300, Personal Truck
+C400, Commercial Truck

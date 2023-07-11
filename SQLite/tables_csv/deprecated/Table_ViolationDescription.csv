@@ -1,0 +1,12 @@
+DescriptionID, ViolationType, ViolationIncurred, Points, Fine
+D1000, V100, Meter Infraction, 0, 10
+D1100, V100, Improperly parking in a handicapped space, 0, 500
+D1200, V400, Vehicular Homicide, 10, 10000
+D1300, V200, Running a red light, 2, 100
+D1400, V200, Exceeding speed limit by more than 10 mph in a 50 mph zone, 2, 150
+D1500, V200, Exceeding speed limit by more than 5 mph in a zone less than 55 mph, 2, 200
+D1600, V200, Exceeding speed limit by more than 30 mph, 4, 250
+D1700, V300, Reckless Driving, 4, 1500
+D1800, V300, Driving under the influence of alcohol or drugs  (DUI), 6, 5000
+D1900, V300, Driving with a suspended license, 6, 200
+D2000, V400, Hit and Run, 8, 5000

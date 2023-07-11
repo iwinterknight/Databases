@@ -1,0 +1,5 @@
+ViolationType, TypeDescription
+V100, Parking Citation
+V200, Infraction
+V300, Misdemeanor
+V400, Felony

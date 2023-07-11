@@ -1,0 +1,96 @@
+--
+-- File generated with SQLiteStudio v3.4.4 on Mon Jun 26 23:06:30 2023
+--
+-- Text encoding used: System
+--
+PRAGMA foreign_keys = off;
+BEGIN TRANSACTION;
+
+-- Table: Insurance
+CREATE TABLE IF NOT EXISTS Insurance 
+(InsuranceID char(10) not null,
+ ExpirationDate date,
+ PhoneNumber char(12),
+ InsuranceType varchar(50),
+ primary key(InsuranceID));
+
+-- Table: LawEnforcement
+CREATE TABLE IF NOT EXISTS LawEnforcement 
+(PoliceID char(10) not null,
+ City varchar(20),
+ State char(2),
+ PhoneNumber char(12),
+ primary key(PoliceID));
+
+-- Table: People
+CREATE TABLE IF NOT EXISTS People 
+(SSN char(11) not null,
+ FirstName varchar(25) not null,
+ Lastname varchar(25) not null,
+ HouseNo int,
+ StreetName varchar(50),
+ City varchar(20),
+ State char(2),
+ Zipcode int,
+ InsuranceID char(10),
+ VehicleID char(16),
+ primary key(SSN),
+ foreign key(InsuranceID) references Insurance(InsuranceID) ON UPDATE CASCADE
+ foreign key(VehicleID) references VehicleLicenses(VehicleID) ON UPDATE CASCADE);
+
+-- Table: VehicleLicenses
+CREATE TABLE IF NOT EXISTS VehicleLicenses
+(VehicleID char(16) not null,
+ LicenseNumber char(8),
+ primary key(VehicleID),
+ foreign key(LicenseNumber) references Vehicles(LicenseNumber) ON UPDATE CASCADE);
+
+-- Table: Vehicles
+CREATE TABLE IF NOT EXISTS Vehicles 
+(LicenseNumber char(8) not null,
+ RegistrationCity varchar(20),
+ RegistrationState char(2),
+ RegistrationZipCode int,
+ primary key(LicenseNumber));
+
+-- Table: Victims
+CREATE TABLE IF NOT EXISTS Victims 
+(SSN char(11) not null,
+ PoliceID char(10) not null,
+ primary key(SSN, PoliceID),
+ foreign key(SSN) references People(SSN) ON UPDATE CASCADE,
+ foreign key(PoliceID) references LawEnforcement(PoliceID) ON UPDATE CASCADE);
+
+-- Table: ViolationDescriptions
+CREATE TABLE IF NOT EXISTS ViolationDescriptions 
+(DescriptionID char(5) not null,
+ ViolationType varchar(20),
+ ViolationIncurred varchar(50),
+ Points int,
+ Fine int,
+ primary key(DescriptionID));
+
+-- Table: Violations
+CREATE TABLE IF NOT EXISTS Violations 
+(ViolationID char (5) NOT NULL, 
+ LicenseNumber char (8), 
+ DescriptionID char (5), 
+ ViolationState char (2), 
+ Paid varchar (5), 
+ ViolationDate date, 
+ PRIMARY KEY (ViolationID), 
+ FOREIGN KEY (LicenseNumber) REFERENCES Vehicles (LicenseNumber) ON UPDATE CASCADE, 
+ FOREIGN KEY (DescriptionID) REFERENCES ViolationDescriptions (DescriptionID) ON UPDATE CASCADE);
+
+-- Table: Violators
+CREATE TABLE IF NOT EXISTS Violators
+(SSN char(11) not null,
+ ViolationID char(5) not null,
+ PoliceID char(10),
+ primary key(SSN, ViolationID),
+ foreign key(SSN) references People(SSN) ON UPDATE CASCADE,
+ foreign key(ViolationID) references Violations(ViolationID) ON UPDATE CASCADE,
+ foreign key(PoliceID) references LawEnforcement(PoliceID) ON UPDATE CASCADE);
+
+COMMIT TRANSACTION;
+PRAGMA foreign_keys = on;
