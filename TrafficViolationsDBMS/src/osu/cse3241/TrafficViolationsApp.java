@@ -20,7 +20,7 @@ public class TrafficViolationsApp {
 
 	private static String DATABASE = "TrafficViolations.db";
 	
-	private static Utils parserObj;
+	private static Parser parserObj = new Parser();
 
 	public static Connection initializeDB(String databaseFileName) {
 		String url = "jdbc:sqlite:" + databaseFileName;
