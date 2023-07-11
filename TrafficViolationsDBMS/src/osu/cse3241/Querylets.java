@@ -22,9 +22,11 @@ public class Querylets {
 			}
 			
 			ResultSet rs = stmt.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int columnCount = rsmd.getColumnCount();
-			return columnCount;
+			int tupleCount = 0;
+			while (rs.next()) {
+				tupleCount++;
+			}
+			return tupleCount;
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}

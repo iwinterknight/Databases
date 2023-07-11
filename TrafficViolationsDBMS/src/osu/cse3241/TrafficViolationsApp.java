@@ -14,7 +14,7 @@ import java.sql.Statement;
 import java.util.*;
 
 import osu.cse3241.Utils;
-
+import osu.cse3241.insert.*;
 
 public class TrafficViolationsApp {
 
@@ -43,137 +43,51 @@ public class TrafficViolationsApp {
 		}
 		return conn;
 	}
-
-	public static void sqlQuery(Connection conn, String sql, boolean has_params, String param) {
-		try {
-			PreparedStatement stmt = conn.prepareStatement(sql);
-			
-			if (has_params) {
-				stmt.setString(1, param);
-			}
-			
-			ResultSet rs = stmt.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int columnCount = rsmd.getColumnCount();
-			for (int i = 1; i <= columnCount; i++) {
-				String value = rsmd.getColumnName(i);
-				System.out.print(value);
-				if (i < columnCount)
-					System.out.print(",  ");
-			}
-			System.out.print("\n");
-			while (rs.next()) {
-				for (int i = 1; i <= columnCount; i++) {
-					String columnValue = rs.getString(i);
-					System.out.print(columnValue);
-					if (i < columnCount)
-						System.out.print(",  ");
-				}
-				System.out.print("\n");
-			}
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-	}
 	
-	public static void sqlQuery2(Connection conn, String sql, boolean has_params, List<String> params) {
-		try {
-			PreparedStatement stmt = conn.prepareStatement(sql);
-			
-			if (has_params) {
-				int i = 1;
-				for (String param : params) {
-					stmt.setString(i, param);
-					i++;
-				}
-			}
-			
-			ResultSet rs = stmt.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int columnCount = rsmd.getColumnCount();
-			for (int i = 1; i <= columnCount; i++) {
-				String value = rsmd.getColumnName(i);
-				System.out.print(value);
-				if (i < columnCount)
-					System.out.print(",  ");
-			}
-			System.out.print("\n");
-			while (rs.next()) {
-				for (int i = 1; i <= columnCount; i++) {
-					String columnValue = rs.getString(i);
-					System.out.print(columnValue);
-					if (i < columnCount)
-						System.out.print(",  ");
-				}
-				System.out.print("\n");
-			}
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
 	public static void main(String[] args) {
 		System.out.println("This is a new run");
 		Connection conn = initializeDB(DATABASE);
+	
+		InsertUtil insertUtil = new InsertUtil();
+		insertUtil.setParserObj(parserObj);
+		insertUtil.setConn(conn);
 		
-		System.out.println("Enter :\n1 for All Violations\n2 for Violations against which fine has been paid\n3 for Violations against which fine has not been paid\n4 for Violations in between two dates.\n");
+		PeopleVehicles peopleVehicles = new PeopleVehicles();
+		
+		System.out.println("Enter :\n1 to enter Vehicle Record\n2 to enter Person's Record\n");
 		BufferedReader reader = new BufferedReader(
 	            new InputStreamReader(System.in));
 	 
-		String inp = "";
+		String selection = "";
         try {
-			inp = reader.readLine();
+        	selection = reader.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
      
         String sqlStatement;
-        if (inp.equals("1")) {
-        	sqlStatement = "SELECT * FROM Violations;";
-        	sqlQuery(conn, sqlStatement, false, "");	
-        }
-        else if(inp.equals("2")) {
-        	sqlStatement = "SELECT * FROM Violations where Paid = ?;";
-        	sqlQuery(conn, sqlStatement, true, "Yes");
-        }
-        else if(inp.equals("3")) {
-        	sqlStatement = "SELECT * FROM Violations where Paid = ?;";
-        	sqlQuery(conn, sqlStatement, true, "No");
-        }
-        else if(inp.equals("4")) {
-        	System.out.println("Enter from date in yyyy-mm-dd format:");
-    		reader = new BufferedReader(
+        if (selection.equals("1")) {
+        	System.out.println("Let's first verify whether the Vehicle already exists in the Database.\nEnter Vehicle's License Number\n");
+        	String inpLicenseNumber = "";
+            reader = new BufferedReader(
     	            new InputStreamReader(System.in));
-    		inp = "";
             try {
-    			inp = reader.readLine();
+            	inpLicenseNumber = reader.readLine();
     		} catch (IOException e) {
     			e.printStackTrace();
     		}
-            String date1 = inp;
             
-            System.out.println("Enter to date in yyyy-mm-dd format:");
-    		reader = new BufferedReader(
-    	            new InputStreamReader(System.in));
-    		inp = "";
-            try {
-    			inp = reader.readLine();
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
-            String date2 = inp;
-            
-            List<String> params = new ArrayList<String>();
-            params.add(date1);
-            params.add(date2);
-        	sqlStatement = "SELECT * FROM Violations where ViolationDate between date(?) and date(?);";
-        	sqlQuery2(conn, sqlStatement, true, params);
+            boolean vehicleExists = insertUtil.checkVehicleExists(inpLicenseNumber);
+            if (vehicleExists) {
+            	System.out.println("Vehicle already exists. Retrieving vehicle information...\n");
+            	List<Object> vehicleInformation = insertUtil.getVehicleInformation(inpLicenseNumber);
+            	String vehicleLicenseNumber = (String)vehicleInformation.get(0);
+            	String vehicleRegistrationCity = (String)vehicleInformation.get(1);
+            	String vehicleRegistrationState = (String)vehicleInformation.get(2);
+            	int vehicleRegistrationZipCode = (int)vehicleInformation.get(3);            	
+			}
+        } else if (selection.equals("2")) {
+        	peopleVehicles.insertPeople(insertUtil);
         }
-
-		System.out.println("*********************************************************************");
-		System.out.println("Part 5 - Add another query");
-
-		System.out.println("*********************************************************************");
-		System.out.println("Part 6 - Add other queries - Use PreparedStatements");
-	}
+    }
 }

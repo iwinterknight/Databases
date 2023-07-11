@@ -28,13 +28,11 @@ public class Parser {
 	}
 	
 	public boolean checkStringExists(String item, String TableName, String AttributeName) {
-		String sqlStatement = "SELECT * FROM ? where ? = ?;";
+		String sqlStatement = "SELECT * FROM " + TableName + " where " + AttributeName + " = ?;";
 		List<String> params = new ArrayList<String>();
-        params.add(TableName);
-        params.add(AttributeName);
         params.add(item);
-    	int columnCount = Querylets.sqlQueryAllStrings(conn, sqlStatement, true, params);
-    	if (columnCount > 0) {
+    	int tupleCount = Querylets.sqlQueryAllStrings(conn, sqlStatement, true, params);
+    	if (tupleCount > 0) {
     		return true;
     	}
     	return false;

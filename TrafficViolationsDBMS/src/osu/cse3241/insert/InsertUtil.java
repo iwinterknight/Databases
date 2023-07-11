@@ -13,30 +13,10 @@ import osu.cse3241.Querylets;
 import osu.cse3241.insert.InsuranceTypes;
 
 
-public class InsertPeople {
+public class InsertUtil {
 	
 	private Connection conn;
 	private Parser parserObj;
-
-	private String InsuranceID;
-	private String ExpirationDate;
-	private String PhoneNumber;
-	private String InsuranceType;
-	
-	private String LicenseNumber;
-	private String RegistrationCity;
-	private String RegistrationState;
-	private int RegistrationZipCode;
-	
-	private String VehicleID;	
-
-	private String FirstName;
-	private String Lastname;
-	private int HouseNo;
-	private String StreetName;
-	private String City;
-	private String State;
-	private int Zipcode;
 
 	boolean validFormats;
 	boolean uniqueEntries;
@@ -61,7 +41,7 @@ public class InsertPeople {
 		List<Integer> spltLengths = new ArrayList<>();
 		spltLengths.add(4);
 		spltLengths.add(2);
-		spltLengths.add(3);
+		spltLengths.add(2);
 		validFormats = this.parserObj.checkStringFormat(expirationDate, "-", 2, spltLengths);
 		
 		if (validFormats && uniqueEntries) {
@@ -71,9 +51,67 @@ public class InsertPeople {
 	        params.add(phoneNumber);
 	        params.add(insuranceType);
 			String sqlStatement = "INSERT INTO Insurance (InsuranceID, ExpirationDate, PhoneNumber, InsuranceType) "
-					+ "VALUES ('?', '?', '?', '?')";
-	    	Querylets.sqlQueryAllStrings(conn, sqlStatement, entryExists, params)	
+					+ "VALUES (?, ?, ?, ?);";
+	    	Querylets.sqlQueryAllStrings(conn, sqlStatement, entryExists, params);	
 		}
+	}
+	
+	public boolean checkVehicleExists(String licenseNumber) {
+		entryExists = this.parserObj.checkStringExists(licenseNumber, "Vehicles", "LicenseNumber");
+		if (entryExists) {
+			return true;
+		}
+		return false;
+	}
+	
+	public List<Object> getVehicleInformation(String licenseNumber) {
+		String sqlStatement = "SELECT * FROM Vehicles WHERE LicenseNumber = ?;";
+		List<Object> returnList = new ArrayList<>(); 
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement(sqlStatement);
+			stmt.setString(1, licenseNumber);
+			ResultSet rs = stmt.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			
+			while (rs.next()) {
+				for (int i = 1; i <= columnCount; i++) {
+					String columnValue = rs.getString(i);
+					returnList.add(columnValue);
+				}
+			}
+			
+			return returnList;
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return null;
+	}
+	
+	public List<Object> getVehicleLicensesInformation(String licenseNumber) {
+		String sqlStatement = "SELECT * FROM VehicleLicenses WHERE LicenseNumber = ?;";
+		List<Object> returnList = new ArrayList<>(); 
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement(sqlStatement);
+			stmt.setString(1, licenseNumber);
+			ResultSet rs = stmt.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			
+			while (rs.next()) {
+				for (int i = 1; i <= columnCount; i++) {
+					String columnValue = rs.getString(i);
+					returnList.add(columnValue);
+				}
+			}
+			
+			return returnList;
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return null;
 	}
 	
 	public void enterVehicleInformation(String licenseNumber, String registrationCity, String registrationState, int registrationZipCode) {
@@ -102,20 +140,12 @@ public class InsertPeople {
 		}
 	}
 	
-	public boolean checkVehicleExists(String licenseNumber) {
-		entryExists = this.parserObj.checkStringExists(licenseNumber, "VehicleLicenses", "LicenseNumber");
-		if (entryExists) {
-			return true;
-		}
-		return false;
-	}
-	
 	public void enterVehicleLicensesInformation(String vehicleID, String licenseNumber) {
 		validFormats = true;
 		uniqueEntries = true;
 		
-		uniqueEntries = this.parserObj.checkStringExists(vehicleID, "VehicleLicenses", "VehicleID");
-		uniqueEntries = this.parserObj.checkStringExists(licenseNumber, "VehicleLicenses", "LicenseNumber");
+		uniqueEntries = !this.parserObj.checkStringExists(vehicleID, "VehicleLicenses", "VehicleID");
+		uniqueEntries = !this.parserObj.checkStringExists(licenseNumber, "VehicleLicenses", "LicenseNumber");
 	
 		String sqlStatement = "INSERT INTO VehicleLicenses (VehicleID, LicenseNumber) VALUES (?, ?);";
 		
@@ -141,9 +171,9 @@ public class InsertPeople {
 		uniqueEntries = true;
 		entryExists = false;
 		
-		uniqueEntries = this.parserObj.checkStringExists(SSN, "People", "SSN");
+		uniqueEntries = !this.parserObj.checkStringExists(SSN, "People", "SSN");
 		entryExists = this.parserObj.checkStringExists(InsuranceID, "Insurance", "InsuranceID");
-		entryExists = this.parserObj.checkStringExists(VehicleID, "Vehicles", "VehicleID");
+		entryExists = this.parserObj.checkStringExists(VehicleID, "People", "VehicleID");
 	
 		List<Integer> spltLengths = new ArrayList<>();
 		spltLengths.add(3);
@@ -176,6 +206,5 @@ public class InsertPeople {
 			}
 		}
 	}
-	
 	
 }
